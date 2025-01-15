@@ -67,9 +67,9 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
       case "/":
         if (curr === 0){
+          resetCalculator()
           currentInput = "Undefined";
           updateDisplay();
-          resetCalculator()
           return;
         }
         result = prev / curr;
