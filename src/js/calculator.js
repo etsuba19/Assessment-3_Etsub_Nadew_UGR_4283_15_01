@@ -1,44 +1,60 @@
 document.addEventListener("DOMContentLoaded", () => {
   const display = document.getElementById("display");
-  const clearButton = document.getElementById("clear");
-  const equalsButton = document.getElementById("equals");
-  const numButtons = Array.from(document.getElementsByClassName("btn"));
+  const clearsign = document.getElementById("clear");
+  const equalsign = document.getElementById("equals");
+  const numbuttons = Array.from(document.getElementsByClassName("btn"));
 
   let previousInput = "";
   let currentInput = "";
   let operator = "";
+  let resetOnNextInput = false;
 
   function updateDisplay() {
-    display.value =
-      previousInput + (operator ? ` ${operator} ` : "") + currentInput || 0;
+    // display.value = currentInput || previousInput || "0";
+    display.value = previousInput + (operator ? ` ${operator} ` : "") + currentInput;
+    if (!display.value.trim()) display.value = "0";
   }
 
-  numButtons.forEach((button) => {
+  numbuttons.forEach((button) => {
     button.addEventListener("click", (e) => {
       const value = e.target.dataset.value;
-      if (["*", "-", "+", "/"].includes(value)) {
+
+      if (["+", "-", "/", "*"].includes(value)) {
         if (currentInput === "") return;
+        if (resetOnNextInput) resetOnNextInput = false;
         if (previousInput !== "") {
           calculate();
         }
+
         operator = value;
         previousInput = currentInput;
         currentInput = "";
+
       } else {
+        if (resetOnNextInput) {
+          currentInput = "";
+          resetOnNextInput = false;
+        }
         currentInput += value;
       }
       updateDisplay();
     });
   });
+  
+  function resetCalculator(){
+    previousInput = "";
+    currentInput = "";
+    operator = "";
+  }
 
   function calculate() {
+    let result = 0;
     const prev = parseFloat(previousInput);
     const curr = parseFloat(currentInput);
-    if (isNaN(prev) || isNaN(curr)) {
-      return;
-    }
 
-    let result;
+    // exception handling
+    if (isNaN(prev) || isNaN(curr)) return;
+
     switch (operator) {
       case "+":
         result = prev + curr;
@@ -50,32 +66,31 @@ document.addEventListener("DOMContentLoaded", () => {
         result = prev * curr;
         break;
       case "/":
-        if (curr === 0) {
-          alert("Cannot divide by zero");
-          clearCalculator();
+        if (curr === 0){
+          currentInput = "Undefined";
+          updateDisplay();
+          resetCalculator()
           return;
         }
         result = prev / curr;
-        result = result.toFixed(2);
         break;
       default:
         return;
     }
-
-    currentInput = result;
-    operator = "";
+    currentInput = parseFloat(result.toFixed(2)).toString();
     previousInput = "";
+    operator = "";
+    resetOnNextInput = true;
+    updateDisplay();
   }
 
-  equalsButton.addEventListener("click", (e) => {
+  equalsign.addEventListener("click", (e) => {
     calculate();
-    updateDisplay();
   });
 
-  clearButton.addEventListener("click", (e) => {
-    currentInput = "";
-    previousInput = "";
-    operator = "";
+  clearsign.addEventListener("click", (e) => {
+    resetCalculator();
+    resetOnNextInput = false;
     updateDisplay();
   });
 });
